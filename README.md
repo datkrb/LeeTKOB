@@ -47,7 +47,9 @@ A brief that works:
 > request, on the Node version `package.json` asks for, and run the same `npm run check` a
 > developer runs. Show me your plan first. Do not touch `src/` or `test/` in this step.
 
-Expect red. **Red is the point of this step.** Open it as a pull request; do not merge it yet.
+Open it as a pull request and expect red: **red is the point of this step.** Read the log. The first failure is a lint error that the old workflow was hiding. Have your assistant fix that one line and push.
+
+The PR goes green. Do not celebrate yet, and do not merge: step 4 is why.
 
 ### 3. Protect `main`
 
@@ -63,8 +65,8 @@ step 2 comes first.
 ### 4. Find the tests that cannot fail
 
 Some tests in `test/contract/` pass on a broken build. Read each one next to the contract:
-*would this go red if the code broke that rule?* Make them strict, in their own commit. They
-go red, and that is correct: the code breaks its contract in two places.
+*would this go red if the code broke that rule?* Make them strict, in their own commit, and
+push. The PR goes red again, and that is correct: the code breaks its contract in two places.
 
 ### 5. Fix the code, not the tests
 
@@ -94,7 +96,7 @@ check that refuses while reviews are pending), open a PR, and watch the merge st
 | 6 | No way round it | `git push origin main` from your laptop | the push is **rejected** |
 | 7 | Red stops the merge | your deliberate-break PR | the merge button is disabled, for you as well, with a red check named |
 | 8 | Refused means nothing changed | your stricter test for *a TA of another class* | it reads `published_at` after the call |
-| 9 | Your tests were not weakened to get green | `git diff <first commit> -- test/` | only additions and stricter assertions |
+| 9 | Your tests were not weakened to get green | `git diff <first commit> -- test/` | no assertion was removed or loosened; a removed `try/catch` is fine |
 | 10 | The browser job runs | the `e2e` job in your last PR | green, and required |
 
 ## Files
