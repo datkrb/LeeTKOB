@@ -14,7 +14,6 @@ export function problem(res, status, slug, title, extra = {}) {
 }
 
 export async function readJson(req) {
-  const legacyLimit = 1024;
   let raw = '';
   for await (const chunk of req) raw += chunk;
   if (!raw) return {};
