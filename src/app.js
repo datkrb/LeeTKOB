@@ -23,9 +23,13 @@ export function createApp(db) {
     submission: db.prepare(`SELECT s.id, l.class_id FROM submissions s
                             JOIN labs l ON l.id = s.lab_id WHERE s.id = ?`),
     review: db.prepare('UPDATE submissions SET decision = ? WHERE id = ?'),
-    publish: db.prepare(
-      "UPDATE labs SET published_at = datetime('now') WHERE id = ? AND published_at IS NULL",
-    ),
+    pending: db.prepare(`SELECT COUNT(*) AS n FROM submissions WHERE lab_id = ?
+                         AND verdict IN ('violation','unsure') AND decision IS NULL`),
+    // One statement: the pending check and the write cannot be split by another request.
+    publish: db.prepare(`UPDATE labs SET published_at = datetime('now')
+                         WHERE id = ? AND published_at IS NULL AND NOT EXISTS (
+                           SELECT 1 FROM submissions WHERE lab_id = labs.id
+                           AND verdict IN ('violation','unsure') AND decision IS NULL)`),
   };
 
   const whoIs = (req) => {
@@ -72,13 +76,20 @@ export function createApp(db) {
     if (req.method === 'POST' && p[1] === 'labs' && p[3] === 'publish' && p.length === 4) {
       const lab = q.lab.get(Number(p[2]));
       if (!lab) return problem(res, 404, 'not-found', 'No such lab');
-      // Mark it first, so a double click on Publish cannot race.
-      q.publish.run(lab.id);
+      // Who may call it comes first: a refused call must change nothing.
       if (!isStaff(me, lab.class_id)) {
         if (q.enrolled.get(lab.class_id, me.id)) {
           return problem(res, 403, 'forbidden', 'Only staff of this class may publish');
         }
         return problem(res, 404, 'not-found', 'No such lab');
+      }
+      if (lab.published_at === null) {
+        // The UPDATE is conditional, so a double click publishes once.
+        const { changes } = q.publish.run(lab.id);
+        if (changes === 0 && q.lab.get(lab.id).published_at === null) {
+          const pending = q.pending.get(lab.id).n;
+          return problem(res, 409, 'reviews-pending', 'Reviews pending', { pending });
+        }
       }
       return send(res, 200, { lab: lab.id, publishedAt: q.lab.get(lab.id).published_at });
     }
