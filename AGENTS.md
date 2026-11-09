@@ -1,6 +1,6 @@
 # LeeTKOB — rules for the coding assistant
 
-Read by Codex (`AGENTS.md`) and Claude Code (`CLAUDE.md` imports this file). Keep it short.
+Read by Codex (`AGENTS.md`), Google Gemini / Antigravity (`GEMINI.md`) and Claude Code (`CLAUDE.md` imports this file). Keep it short.
 A line marked *(why: …)* exists because something actually went wrong.
 
 ## Stack
@@ -13,6 +13,7 @@ A line marked *(why: …)* exists because something actually went wrong.
 ## Commands
 
 All of them are what CI runs (`.github/workflows/ci.yml`). Run `npm run check` before every push.
+On Windows PowerShell, run `npm.cmd` if `.ps1` execution policy blocks `npm`. *(why: default Windows ExecutionPolicy blocks npm.ps1).*
 
 ```bash
 npm ci                # install exactly the lockfile
@@ -39,6 +40,7 @@ npm run e2e           # Playwright journey (needs: npx playwright install chromi
 - Commits are authored by the team member only: no `Co-Authored-By` trailer for the assistant.
   AI use is declared in `AI-LOG.md` instead. *(why: the student rejected such trailers on
   2026-11-09; five commits were rewritten before merge — see AI-LOG.)*
+- Branch naming convention: `feat/*`, `fix/*`, `docs/*`, `contract/*`. PRs require passing checks before merge.
 - Files use LF (`.gitattributes`). *(why: on Windows `format:check` failed on 13 files that
   CI passed — b4d1471.)*
 
