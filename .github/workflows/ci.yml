@@ -4,8 +4,14 @@ on:
   pull_request:
   push:
     branches: [main]
+    tags: ['*']
+
+permissions:
+  contents: read
 
 jobs:
+  # The gate: lint, format check, type check, unit tests, contract tests.
+  # Exactly `npm run check`, the command a developer runs (README).
   gates:
     runs-on: ubuntu-latest
     steps:
@@ -15,5 +21,31 @@ jobs:
           node-version-file: package.json
           cache: npm
       - run: npm ci
-      # The same command a developer runs. Any failing check fails the job.
+      # Any failing check fails the job. Never add `|| true` or continue-on-error here.
       - run: npm run check
+
+  # One browser journey: a TA clears the review queue and publishes.
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e
+
+  # No secret anywhere in the git history, not only in the current tree.
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: gitleaks (full history)
+        run: |
+          curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.21.2/gitleaks_8.21.2_linux_x64.tar.gz \
+            | tar -xz gitleaks
+          ./gitleaks git --redact --verbose --exit-code 1 .
