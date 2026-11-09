@@ -26,7 +26,8 @@ export function createApp(db) {
     pending: db.prepare(`SELECT COUNT(*) AS n FROM submissions WHERE lab_id = ?
                          AND verdict IN ('violation','unsure') AND decision IS NULL`),
     // One statement: the pending check and the write cannot be split by another request.
-    publish: db.prepare(`UPDATE labs SET published_at = datetime('now')
+    // ISO 8601 UTC, second precision: docs/contract/publish.md §1.
+    publish: db.prepare(`UPDATE labs SET published_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now')
                          WHERE id = ? AND published_at IS NULL AND NOT EXISTS (
                            SELECT 1 FROM submissions WHERE lab_id = labs.id
                            AND verdict IN ('violation','unsure') AND decision IS NULL)`),
@@ -37,6 +38,8 @@ export function createApp(db) {
     return m ? q.userByToken.get(m[1]) : undefined;
   };
   const isStaff = (me, classId) => me.role === 'admin' || !!q.staff.get(classId, me.id);
+  // Ids are positive integers; anything else names no resource (contract §1).
+  const idFrom = (s) => (/^[1-9]\d{0,15}$/.test(s) ? Number(s) : null);
 
   async function handle(req, res) {
     const url = new URL(req.url, 'http://x');
@@ -74,7 +77,8 @@ export function createApp(db) {
     }
 
     if (req.method === 'POST' && p[1] === 'labs' && p[3] === 'publish' && p.length === 4) {
-      const lab = q.lab.get(Number(p[2]));
+      const id = idFrom(p[2]);
+      const lab = id === null ? undefined : q.lab.get(id);
       if (!lab) return problem(res, 404, 'not-found', 'No such lab');
       // Who may call it comes first: a refused call must change nothing.
       if (!isStaff(me, lab.class_id)) {
@@ -88,7 +92,8 @@ export function createApp(db) {
         const { changes } = q.publish.run(lab.id);
         if (changes === 0 && q.lab.get(lab.id).published_at === null) {
           const pending = q.pending.get(lab.id).n;
-          return problem(res, 409, 'reviews-pending', 'Reviews pending', { pending });
+          const detail = `${pending} submission${pending === 1 ? '' : 's'} still need a TA decision`;
+          return problem(res, 409, 'reviews-pending', detail, { pending });
         }
       }
       return send(res, 200, { lab: lab.id, publishedAt: q.lab.get(lab.id).published_at });
@@ -100,7 +105,8 @@ export function createApp(db) {
   return createServer((req, res) =>
     handle(req, res).catch((e) => {
       console.error(e);
-      if (!res.headersSent) problem(res, 500, 'internal', 'Something went wrong');
+      // A fixed sentence: never the SQL message, a table name or a stack (contract §2).
+      if (!res.headersSent) problem(res, 500, 'internal', 'Something went wrong on our side.');
     }),
   );
 }
