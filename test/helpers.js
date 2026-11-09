@@ -5,9 +5,10 @@ import { createApp } from '../src/app.js';
 export async function startApp(db = open()) {
   const server = createApp(db).listen(0);
   await new Promise((r) => server.once('listening', r));
-  const base = `http://localhost:${server.address().port}`;
+  const base = `http://localhost:${/** @type {import('node:net').AddressInfo} */ (server.address()).port}`;
 
   // A raw call: the test chooses every header, so it can send a broken one.
+  /** @param {string} method @param {string} path @param {{ headers?: Record<string, string>, body?: string }} [init] */
   async function raw(method, path, { headers = {}, body } = {}) {
     const res = await fetch(base + path, { method, headers, body });
     const text = await res.text();
@@ -37,7 +38,9 @@ export async function startApp(db = open()) {
   }
 
   const publishedAt = (lab) =>
-    db.prepare('SELECT published_at AS t FROM labs WHERE id = ?').get(lab)?.t ?? null;
+    /** @type {{ t: string | null } | undefined} */ (
+      db.prepare('SELECT published_at AS t FROM labs WHERE id = ?').get(lab)
+    )?.t ?? null;
 
   return { as, raw, db, publishedAt, close: () => new Promise((r) => server.close(r)) };
 }
