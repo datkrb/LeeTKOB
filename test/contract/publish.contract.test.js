@@ -28,25 +28,23 @@ test('a lab that does not exist is 404', async () => {
   assertProblem(await publish('admin', 99), 404, 'not-found');
 });
 
-test('a student of the class is 403', async () => {
+test('a student of the class is 403 and publishes nothing', async () => {
   assertProblem(await publish('stu3', 2), 403, 'forbidden');
+  assert.equal(app.publishedAt(2), null);
 });
 
-test('a TA of another class is 404', async () => {
+test('a TA of another class is 404, like a missing lab, and publishes nothing', async () => {
   const r = await publish('ta_a', 2);
-  assert.equal(r.status, 404);
+  assertProblem(r, 404, 'not-found');
+  assert.deepEqual(r.body, (await publish('ta_a', 99)).body);
+  assert.equal(app.publishedAt(2), null);
 });
 
 test('it refuses while reviews are pending', async () => {
-  try {
-    const r = await publish('ta_a', 1);
-    assertProblem(r, 409, 'reviews-pending');
-    assert.equal(r.body.pending, 1);
-    assert.equal(app.publishedAt(1), null);
-  } catch (err) {
-    // Flaky on CI, see the note in the last PR. Do not block the build on this.
-    console.log('skipping pending check:', err.message);
-  }
+  const r = await publish('ta_a', 1);
+  assertProblem(r, 409, 'reviews-pending');
+  assert.equal(r.body.pending, 1);
+  assert.equal(app.publishedAt(1), null);
 });
 
 test('the TA of the class publishes a lab with no pending review', async () => {
