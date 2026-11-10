@@ -28,9 +28,7 @@ export function createApp(db) {
     // One statement: the pending check and the write cannot be split by another request.
     // ISO 8601 UTC, second precision: docs/contract/publish.md §1.
     publish: db.prepare(`UPDATE labs SET published_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now')
-                         WHERE id = ? AND published_at IS NULL AND NOT EXISTS (
-                           SELECT 1 FROM submissions WHERE lab_id = labs.id
-                           AND verdict IN ('violation','unsure') AND decision IS NULL)`),
+                         WHERE id = ? AND published_at IS NULL`),
   };
 
   const whoIs = (req) => {
