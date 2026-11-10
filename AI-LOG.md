@@ -68,3 +68,8 @@ that writes the code), and no team member reviewed the contract before the code 
 The separate commits (contract → tests → code) are the only check we have.
 By hand: none of the contract, tests, code or rules was written or edited by hand. The team
 members still need to read the contract and the rules file to explain them in the oral.
+
+
+## 2026-11-10 — Refining rules file, Gemini integration, self-assessment review
+
+Tool: Google Gemini / Antigravity. Asked for: Review PA#2 completion status, clarify AGENTS.md rules, and propose team additions for Gemini / Windows PowerShell. Kept: created GEMINI.md, updated AGENTS.md with Gemini support, Windows PowerShell npm.cmd execution policy note, and branch conventions (commit 33ea9a9).
