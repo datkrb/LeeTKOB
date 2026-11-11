@@ -55,10 +55,15 @@ Submitted commit: tag `pa2`.
    failed, `gates` went red, the merge stayed blocked. Note: the `e2e` job stayed green — its
    journey reviews before publishing, so it cannot see this break. That is why the rule is
    pinned by contract tests, not by the browser test.
-8. **PR #5:** this file, `AI-LOG.md`, `SELF_ASSESSMENT_REPORT.md`; then the tag `pa2`.
+8. **PR #5:** this file, `AI-LOG.md`, `SELF_ASSESSMENT_REPORT.md`.
+9. **PR #6 (Trần Gia Cường):** his own edit of `AGENTS.md` (Gemini/Antigravity support via
+   `GEMINI.md`, the PowerShell `npm.cmd` rule, branch naming) and of AI-LOG; required checks green.
+10. **PR #7:** the model and its spending cap in README (Gemini `gemini-2.5-flash` free tier, no
+    billing account, cap 0 USD) and the final self-assessment; then the tag `pa2` on its merge
+    commit.
 
 Since protection was turned on, every change reached `main` through a pull request
-(#1, #2, #3, #5); nothing was pushed straight to `main`.
+(#1, #2, #3, #5, #6, #7); nothing was pushed straight to `main`.
 
 ## Reproduce
 
