@@ -73,3 +73,22 @@ members still need to read the contract and the rules file to explain them in th
 ## 2026-11-10 — Refining rules file, Gemini integration, self-assessment review
 
 Tool: Google Gemini / Antigravity. Asked for: Review PA#2 completion status, clarify AGENTS.md rules, and propose team additions for Gemini / Windows PowerShell. Kept: created GEMINI.md, updated AGENTS.md with Gemini support, Windows PowerShell npm.cmd execution policy note, and branch conventions (commit 33ea9a9).
+
+## 2026-11-11 — Final check and packaging
+Tool: Claude Code (Opus 5.5).
+Asked for: pull the team's changes, check them, and assemble the submission; the student wants
+the self-assessment at 100 only with evidence behind it.
+Kept: Cường's commits `33ea9a9` (AGENTS.md, GEMINI.md) and `ed9f7f9` (AI-LOG, self-assessment),
+merged through PR #6 with all three required checks green; no secret or `.env` in them.
+Changed: README and `.env.example` now state the model (Gemini `gemini-2.5-flash`, free tier)
+and its spending cap (0 USD: no billing account on the project), as reported by the student —
+the assistant did not see the key or the Google account and did not verify it. The
+self-assessment was rewritten from 92 to 100: criteria 1 and 2 because of the team's new
+evidence; criteria 5 and 6 because the assistant's earlier deductions (no outside reader; tests
+written by the same agent) are not conditions in the rubric — both remain listed under "what we
+did not manage". Tag `pa2` moved to the final merge commit with the student's approval.
+Rejected: sending the API key to the assistant (the course rules forbid keys in prompts; the
+student kept it in a local `.env`). The 2026-11-10 entry above is kept as written; it does not
+follow the Kept/Changed/Rejected/By hand format in full.
+By hand: Cường edited the rules file and AI-LOG in his own commits (with Gemini assistance, per
+his entry); the student created the free-tier key and decided the final claim. No code by hand.

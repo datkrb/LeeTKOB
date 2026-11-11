@@ -53,11 +53,15 @@ not secrets.
 
 - `.env` is git-ignored. [`.env.example`](.env.example) lists every variable, without values.
   Today the server reads only `PORT`.
-- **Model and spending cap: not set up yet.** The LLM feature starts in PA#3; the team has no
-  model API key yet. Planned: Google Gemini (`gemini-2.5-flash-lite`, the model costed in our
-  PA#1 proposal) — to be confirmed in PA#3. Before a key goes into `.env`, its project gets a
-  budget cap at the provider, and this README will state the provider, the model, the cap and
-  what one lab costs. Until then nothing in this repository calls a model.
+- **Model: Google Gemini, `gemini-2.5-flash`, free tier.** The team's API key belongs to a
+  Google AI Studio project **with no billing account attached**, so it cannot incur any charge:
+  the spending cap is **0 USD**. Requests over the free-tier rate limits are refused by Google,
+  not billed. The key lives only in each member's local `.env` (`LLM_API_KEY`), never in the
+  repository, a prompt or CI. If we ever attach billing (PA#3 or later), we set a budget cap at
+  the provider first and update this paragraph with the cap and the measured cost of one lab.
+- **What one lab costs:** 0 USD on the free tier. Nothing in this repository calls the model
+  yet; the constraint checker arrives in PA#3, and the app's own cap per lab
+  (`LLM_MAX_USD_PER_LAB`) will be enforced there.
 - The assistant's permissions (allowed / ask first / never) are in
   [`docs/permissions.md`](docs/permissions.md) and enforced for Claude Code by
   [`.claude/settings.json`](.claude/settings.json). Rules for the assistant: [`AGENTS.md`](AGENTS.md).

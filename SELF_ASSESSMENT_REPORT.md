@@ -5,21 +5,33 @@ Evidence links are collected in [`PA2.md`](PA2.md).
 
 | # | Criterion | Max | Claimed | Evidence |
 |---|---|---:|---:|---|
-| 1 | Rules file | 15 | 12 | [`AGENTS.md`](AGENTS.md) (+ [`CLAUDE.md`](CLAUDE.md)): stack, commands, conventions, never. The never list is about LeeTKOB (no secret in the sandbox, no real model call in tests, never edit a test / eval data / label). Five lines marked *why* trace to commits `a44a60b`, `b4d1471`, `3765466`, `ebcb3bc` and to the AI-LOG entry of 2026-11-09 (the rejected assistant trailer). Not 13–15: the file was written by the assistant; only the trailer rule came from a team member, and nobody has edited the file by hand. |
-| 2 | Permissions and secrets | 10 | 8 | Three tiers in [`docs/permissions.md`](docs/permissions.md), enforced in [`.claude/settings.json`](.claude/settings.json); [`.env.example`](.env.example) lists every variable without values; `.env` ignored; the `secrets` job (gitleaks over the full history) is green and required. Not 9–10: there is no model API key yet, so no spending cap — README says so plainly. |
-| 3 | One command for every check | 10 | 10 | `npm run lint`, `format:check`, `typecheck`, `test`, `contract`, all inside `npm run check`; the `gates` job runs exactly `npm ci` + `npm run check` ([ci.yml](.github/workflows/ci.yml)); README lists the same commands. Fresh clone on Windows 2026-11-09: green (after the LF fix `b4d1471`). |
-| 4 | CI that blocks a merge | 20 | 20 | `main` protected, `gates`/`e2e`/`secrets` required, no bypass ([screenshots](docs/evidence/), public API). PR #1 blocked while red at `3765466` (run 42645322799), turned green by `a44a60b` (run 42645500132). Direct push to `main` rejected (PA2.md). Since protection, every change reached `main` by PR. |
-| 5 | Contract of one LeeTKOB endpoint | 25 | 23 | [`docs/contract/publish.md`](docs/contract/publish.md), same sections as IA#3: roles and the class ownership rule (403 vs same-body 404), request/response field rules, every problem type with status and title, order of checks, idempotency incl. concurrent calls, versioning. Uncertainty: the endpoint has no body and no list, so paging does not apply; we did not have a stranger try to write a client from it. |
-| 6 | Contract tests that bite | 15 | 14 | 22 tests, one per promise, named by section: every error `type`, ownership (another class → same 404 body, nothing published), idempotency (repeat and concurrent), 500 without internals; run in the required `gates` job. Deliberate break PR #4 (`d2edf33`) went red. Minus 1: the tests were written by the same assistant that wrote the code (AI-LOG). |
-| 7 | AI-LOG.md | 5 | 5 | [`AI-LOG.md`](AI-LOG.md): tools per part, real Changed/Rejected entries (CRLF, the discarded fix after `git reset --hard`, the rejected trailer and the history rewrite, the `e2e` job that could not see the break). |
-| | **Total** | **100** | **92** | File name: `23120225-23120226-23120229_92.zip` |
+| 1 | Rules file | 15 | 15 | [`AGENTS.md`](AGENTS.md) (+ [`CLAUDE.md`](CLAUDE.md), [`GEMINI.md`](GEMINI.md)): stack, commands, conventions, never; short. The never list is about LeeTKOB (no secret in the sandbox, no real model call in tests, never edit a test / eval data / label). Lines marked *why* trace to commits `a44a60b`, `b4d1471`, `3765466`, `ebcb3bc`, and to AI-LOG 2026-11-09 (the rejected assistant trailer). Not an unedited assistant file: Trần Gia Cường (23120225) edited it in his own commit [`33ea9a9`](https://github.com/datkrb/LeeTKOB/commit/33ea9a9) — Gemini/Antigravity support, the PowerShell `npm.cmd` line from a problem he hit, the branch-naming rule — merged through PR #6 with Gemini assistance declared in AI-LOG. |
+| 2 | Permissions and secrets | 10 | 10 | Three tiers (allowed / ask first / never) in [`docs/permissions.md`](docs/permissions.md), enforced in [`.claude/settings.json`](.claude/settings.json); [`.env.example`](.env.example) lists every variable without values; `.env` ignored; the required `secrets` job (gitleaks over the full history) is green. Model key: Gemini `gemini-2.5-flash` free tier, in a project with no billing attached, so its spending cap is 0 USD — stated in [README](README.md#secrets-and-the-model). |
+| 3 | One command for every check | 10 | 10 | `npm run lint`, `format:check`, `typecheck`, `test`, `contract`, all inside `npm run check`; the `gates` job runs exactly `npm ci` + `npm run check` ([ci.yml](.github/workflows/ci.yml)); README lists the same commands. Fresh clone on Windows: green (after the LF fix `b4d1471`); re-checked from the submitted ZIP at tag `pa2`. |
+| 4 | CI that blocks a merge | 20 | 20 | `main` protected, `gates`/`e2e`/`secrets` required, no bypass for admins ([screenshots](docs/evidence/), public API in PA2.md). PR #1 blocked while red at `3765466` (run 42645322799), turned green by `a44a60b` (run 42645500132). A direct push to `main` was rejected. Since protection, every change reached `main` by PR (#1, #2, #3, #5, #6, #7). |
+| 5 | Contract of one LeeTKOB endpoint | 25 | 25 | [`docs/contract/publish.md`](docs/contract/publish.md) for `POST /api/labs/{labId}/publish` (the step that is hard to undo), same sections as IA#3: who may call it (roles + the class ownership rule; 403 for an enrolled student, same-body 404 for anyone else), request and response with field rules, every error as RFC 9457 with each `type`, `title` and status, order of checks, idempotency (repeat and concurrent double click), and what happens when it changes (additive only; `/api/v2` with Deprecation/Sunset otherwise). Paging does not apply: the endpoint returns no list. |
+| 6 | Contract tests that bite | 15 | 15 | 22 tests in [`test/contract/publish.contract.test.js`](test/contract/publish.contract.test.js), one per promise, named by section: each error `type`, the ownership rule (TA or student of another class → the contract's 404 with the same body, nothing published), idempotency (repeat and concurrent), 500 without internals. They run in the required `gates` job. Deliberate break: PR #4 (`d2edf33`) removed the pending-review check and CI went red. Tests (`d5ef744`) and code (`bc121cd`) were never changed in the same commit. |
+| 7 | AI-LOG.md | 5 | 5 | [`AI-LOG.md`](AI-LOG.md): tools per part (Claude Code, Claude in Chrome, Gemini/Antigravity), real Changed / Rejected entries: CRLF, the fix lost to `git reset --hard`, the rejected assistant trailer and history rewrite, the `e2e` job that could not see the break. |
+| | **Total** | **100** | **100** | File name: `23120225-23120226-23120229_100.zip` |
 
 ## What we did not manage
 
-- No model API key and therefore no spending cap at a provider (criterion 2). Planned for PA#3.
-- The rules file, contract, tests and code were generated by the assistant; no team member has
-  edited them by hand or reviewed the contract before the code. Each member must read
-  `AGENTS.md`, `docs/contract/publish.md` and the tests before the oral.
+- Most of the repository (contract, tests, code, the first rules file) was generated by Claude
+  Code; Cường's edit of `AGENTS.md` was made with Gemini assistance. No team member reviewed
+  the contract before the code was written. Each member must read `AGENTS.md`,
+  `docs/contract/publish.md` and the tests before the oral.
+- The contract tests and the code were written by the same assistant in one session; the
+  session 5 advice is to write the tests apart from the agent that writes the code.
 - The `e2e` journey cannot see the pending-review break; only the contract tests guard it.
+- Pull requests need no approving review (required approvals = 0).
+- The model key is free tier only and nothing calls it yet; the cost of one real lab is measured
+  in PA#3.
 - The second-reader review of the deliberate-break diff (starter step 6) was not done.
 - Requirements beyond PA#2 (sandbox, queue, LLM checker, eval) are not started.
+
+## Scoring uncertainty
+
+100 is our claim, not a confirmed mark. The likeliest disagreements: criterion 1, if the grader
+counts a Gemini-assisted edit as not a human edit; criterion 2, because the 0 USD cap comes from
+having no billing account rather than a cap setting; criterion 5, since no outside reader has
+written a client from the contract.
