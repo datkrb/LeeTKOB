@@ -121,4 +121,3 @@ test('evaluateHardRules resolves ban-list constraints and leaves semantic ones f
   assert.equal(remainingConstraints.length, 1);
   assert.equal(remainingConstraints[0].id, 'C2');
 });
-
