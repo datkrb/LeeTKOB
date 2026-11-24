@@ -9,7 +9,7 @@ export default defineConfig({
   },
   webServer: {
     command: 'node src/server.js',
-    env: { PORT: '3007' },
+    env: { PORT: '3007', DB_PATH: ':memory:' },
     url: 'http://localhost:3007',
     reuseExistingServer: false,
   },
