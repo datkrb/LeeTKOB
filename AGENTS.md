@@ -50,11 +50,18 @@ npm run e2e           # Playwright journey (needs: npx playwright install chromi
   `.env` (ignored); `.env.example` lists names without values.
 - Never make the model API key (or any secret) visible inside the judging sandbox — not in its
   environment, files or mounts. Student code is hostile.
+- Never pass `-v /var/run/docker.sock`, `--privileged`, `--env-file`, or `-e LLM_API_KEY` to the
+  sandbox container.
+- Never write memory-limit tests without reading back allocated bytes (to prevent compiler dead-code elimination).
 - Never call a real model in unit or contract tests; use a stub. Only the eval job may call it.
+- Never fabricate real dev runs: call logs must carry genuine provider request IDs.
 - Never send student names, student IDs or comments to the model: statement, constraints and
   stripped code only.
-- Never edit a test, the eval data, a label or a threshold to make a check pass. A red test
-  means the code is wrong; if the contract is wrong, change the contract first, in its own PR.
+- Never hardcode dev-set problem names (e.g. `sort-merge/s05`) or quote dev-set code in prompts
+  or hard rules.
+- Never edit or loosen a test, dev-set files (`eval.mjs`, `labels.jsonl`, dev `.cpp`), a label,
+  or a threshold to make a check pass. A red test means the code is wrong; if the contract is
+  wrong, change the contract first, in its own PR.
   *(why: the starter hid a failing contract test inside `try/catch` — made strict in 3765466.)*
 - Never make CI unable to fail: no `|| true`, no `continue-on-error`, no skipped or `.only`
   tests. *(why: the starter workflow did both and stayed green on a broken build — ebcb3bc.)*
