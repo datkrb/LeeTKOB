@@ -2,8 +2,9 @@ import { open, USERS } from './db.js';
 import { createApp } from './app.js';
 
 const port = Number(process.env.PORT ?? 3007);
-const server = createApp(open()).listen(port, () => {
-  console.log(`LeeTKOB slice on http://localhost:${port}: in-memory data, reset on every start`);
+const dbPath = process.env.DB_PATH || 'data/leetkob.db';
+const server = createApp(open(dbPath)).listen(port, () => {
+  console.log(`LeeTKOB server on http://localhost:${port} (db: ${dbPath})`);
   console.log('tokens:  ' + USERS.map((u) => `${u.name}=${u.token}`).join('  '));
 });
 
