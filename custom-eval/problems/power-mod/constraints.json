@@ -1,0 +1,12 @@
+[
+  {
+    "id": "C1",
+    "text": "Do not call library power functions: `std::pow`, `pow`, `powf`, `powl`.",
+    "deduction": 3
+  },
+  {
+    "id": "C2",
+    "text": "Compute a^b mod m using binary exponentiation (exponentiation by squaring) in O(log b) steps. Repeated linear multiplication over b or floating-point power calls do not satisfy this constraint.",
+    "deduction": 4
+  }
+]
