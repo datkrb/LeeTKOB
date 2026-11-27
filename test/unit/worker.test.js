@@ -276,14 +276,20 @@ test('pass verdicts enter review queue according to samplePassRate while unsure 
         )
         .all(s2.submissionId)
     );
-    assert.deepEqual(v1, [
-      { verdict: 'pass', in_queue: 1 },
-      { verdict: 'unsure', in_queue: 1 },
-    ]);
-    assert.deepEqual(v2, [
-      { verdict: 'pass', in_queue: 0 },
-      { verdict: 'unsure', in_queue: 1 },
-    ]);
+    assert.deepEqual(
+      v1.map((r) => ({ verdict: r.verdict, in_queue: r.in_queue })),
+      [
+        { verdict: 'pass', in_queue: 1 },
+        { verdict: 'unsure', in_queue: 1 },
+      ],
+    );
+    assert.deepEqual(
+      v2.map((r) => ({ verdict: r.verdict, in_queue: r.in_queue })),
+      [
+        { verdict: 'pass', in_queue: 0 },
+        { verdict: 'unsure', in_queue: 1 },
+      ],
+    );
   } finally {
     db.close();
   }
