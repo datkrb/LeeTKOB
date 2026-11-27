@@ -1,5 +1,14 @@
 node_modules/
 data/
+out/
+*.db
+*.db-wal
+*.db-shm
+*.exe
+a.out
+*.zip
+.DS_Store
+Thumbs.db
 .env
 .env.*
 !.env.example
