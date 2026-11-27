@@ -121,3 +121,18 @@ test('evaluateHardRules resolves ban-list constraints and leaves semantic ones f
   assert.equal(remainingConstraints.length, 1);
   assert.equal(remainingConstraints[0].id, 'C2');
 });
+
+test('unqualified banned C function name does not fire on user-namespace qualified calls', () => {
+  const POW_BAN = 'Do not call library power functions: `std::pow`, `pow`.';
+  const userNsCode = [
+    '#include <cmath>',
+    'namespace math_util {',
+    'long long pow(long long a, long long b) { return a + b; }',
+    '}',
+    'int main() { return math_util::pow(2, 3); }',
+  ].join('\n');
+  assert.equal(checkHardRule(userNsCode, POW_BAN).verdict, 'pass');
+
+  const globalCall = '#include <cmath>\nint main() { return ::pow(2, 3); }\n';
+  assert.equal(checkHardRule(globalCall, POW_BAN).verdict, 'violation');
+});
