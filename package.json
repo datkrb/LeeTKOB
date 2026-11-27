@@ -9,6 +9,7 @@
   },
   "scripts": {
     "start": "node src/server.js",
+    "checker": "node src/checker-cli.js",
     "lint": "eslint .",
     "format:check": "prettier --check .",
     "test": "node --test --test-reporter=spec \"test/unit/**/*.test.js\"",
