@@ -14,6 +14,7 @@
     "lint": "eslint .",
     "format:check": "prettier --check .",
     "test": "node --test --test-reporter=spec \"test/unit/**/*.test.js\"",
+    "test:sandbox": "node --test --test-reporter=spec \"test/sandbox/**/*.test.js\"",
     "contract": "node --test --test-reporter=spec \"test/contract/**/*.test.js\"",
     "e2e": "playwright test",
     "check": "npm run lint && npm run format:check && npm run typecheck && npm test && npm run contract",
