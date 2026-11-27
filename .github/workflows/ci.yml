@@ -37,6 +37,17 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run e2e
 
+  # Hardened Docker sandbox: builds the C++17 sandbox image and runs all 9 M1-M9 attacks.
+  sandbox:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+      - run: docker build -f Dockerfile.sandbox -t leetkob-sandbox .
+      - run: npm run test:sandbox
+
   # No secret anywhere in the git history, not only in the current tree.
   secrets:
     runs-on: ubuntu-latest
