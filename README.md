@@ -66,6 +66,37 @@ not secrets.
   [`docs/permissions.md`](docs/permissions.md) and enforced for Claude Code by
   [`.claude/settings.json`](.claude/settings.json). Rules for the assistant: [`AGENTS.md`](AGENTS.md).
 
+## Constraint checker CLI & Docker image (PA#3)
+
+The checker reads only `problems/<id>/statement.md`, `problems/<id>/constraints.json`, and
+`solutions/<id>/*.cpp` (never `labels.jsonl`) and writes predictions JSONL compatible with
+`leetkob-eval/eval.mjs`.
+
+```bash
+# Run locally with model disabled (hard rules only, semantic constraints -> unsure, zero network)
+MODEL_OFF=1 node src/checker-cli.js --data leetkob-eval --out predictions.jsonl
+node leetkob-eval/eval.mjs --data leetkob-eval --predictions predictions.jsonl
+
+# Build and run the checker Docker image offline (marking command)
+docker build -f Dockerfile.checker -t leetkob-checker .
+docker run --rm --network none --memory 256m --pids-limit 64 \
+  -e MODEL_OFF=1 \
+  -v "$PWD/leetkob-eval:/data:ro" \
+  -v "$PWD/out:/out" \
+  leetkob-checker --data /data --out /out/predictions.jsonl
+
+# Run with the real model (reads LLM_API_KEY from local .env; never commit .env)
+node --env-file=.env src/checker-cli.js \
+  --data leetkob-eval \
+  --out eval-runs/dev-run/predictions.jsonl \
+  --call-log eval-runs/dev-run/call-log.jsonl \
+  --delay-ms 4500
+```
+
+Our own extra labelled eval cases sit separately in [`custom-eval/`](custom-eval/) (6 Accepted
+C++ solutions for `power-mod`, including `style`, `trap`, `obvious`, `disguised`, and `injection`
+cases), verified with `g++ -std=c++17 -O2` and `leetkob-eval/eval.mjs`.
+
 ## Files
 
 | Path | What it is |
@@ -73,6 +104,10 @@ not secrets.
 | `docs/contract/publish.md` | the contract of `POST /api/labs/{labId}/publish` |
 | `src/app.js`, `src/http.js` | the routes and the problem-details helper |
 | `src/grades.js` | pure logic, unit tested |
+| `src/hard-rules.js` | syntax-aware C++ ban-list checker |
+| `src/strip.js`, `src/llm.js`, `src/llm-limits.js`, `src/llm-log.js` | C++ stripper, Gemini client, schema/evidence/timeout guardrails, SQLite call log |
+| `src/checker.js`, `src/checker-cli.js`, `Dockerfile.checker` | hard-rules-first pipeline, dataset CLI (`MODEL_OFF=1`), and checker container |
+| `leetkob-eval/`, `custom-eval/` | published dev set (untouched) and team's 6 extra labelled cases |
 | `test/unit/`, `test/contract/`, `e2e/` | the three layers of the pyramid |
 | `AGENTS.md`, `CLAUDE.md`, `docs/permissions.md` | rules and permissions of the coding assistant |
-| `PA2.md`, `AI-LOG.md`, `SELF_ASSESSMENT_REPORT.md` | PA#2 submission |
+| `PA2.md`, `AI-LOG.md`, `SELF_ASSESSMENT_REPORT.md` | checkpoint documentation and logs |
