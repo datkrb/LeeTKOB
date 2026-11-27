@@ -9,6 +9,7 @@
   },
   "scripts": {
     "start": "node src/server.js",
+    "worker": "node src/worker.js",
     "checker": "node src/checker-cli.js",
     "lint": "eslint .",
     "format:check": "prettier --check .",
