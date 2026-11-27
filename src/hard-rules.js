@@ -326,6 +326,21 @@ function analyzeContext(tokens) {
   };
 }
 
+const NON_NAMESPACE_KEYWORDS = new Set([
+  'return',
+  'else',
+  'case',
+  'throw',
+  'new',
+  'delete',
+  'sizeof',
+  'decltype',
+  'alignof',
+  'co_return',
+  'co_await',
+  'co_yield',
+]);
+
 /**
  * Checks whether a qualified chain ending at `idx` matches a target parts array (e.g. ['std', 'sort']).
  * Supports namespace aliases (e.g. `namespace r = std::ranges; r::sort`).
@@ -336,10 +351,15 @@ function analyzeContext(tokens) {
  */
 function readQualifiedChainAt(tokens, idx, namespaceAliases) {
   if (tokens[idx]?.type !== 'ident') return null;
-  // Walk backwards over `::`
+  // Walk backwards over `::` (stopping before statement keywords like `return ::pow(...)`)
   const parts = [tokens[idx].value];
   let cur = idx;
-  while (cur >= 2 && tokens[cur - 1]?.value === '::' && tokens[cur - 2]?.type === 'ident') {
+  while (
+    cur >= 2 &&
+    tokens[cur - 1]?.value === '::' &&
+    tokens[cur - 2]?.type === 'ident' &&
+    !NON_NAMESPACE_KEYWORDS.has(tokens[cur - 2].value)
+  ) {
     parts.unshift(tokens[cur - 2].value);
     cur -= 2;
   }
@@ -429,14 +449,25 @@ function findViolationLine(tokens, ctx, banned) {
     return null;
   }
 
-  // 4. Unqualified C / GNU function like qsort, bsearch, __gcd
+  // 4. Unqualified C / GNU function like qsort, bsearch, __gcd, pow
   if (IDENT_RE.test(banned)) {
     for (let i = 0; i < tokens.length; i++) {
       if (tokens[i].type !== 'ident' || tokens[i].value !== banned) continue;
       const prev = tokens[i - 1]?.value;
       if (prev === '.' || prev === '->') continue;
-      if (ctx.userDefinedNames.has(banned) && prev !== '::') continue;
-      if (tokens[i + 1]?.value === '(' || prev === '::') {
+
+      const chain = readQualifiedChainAt(tokens, i, ctx.namespaceAliases);
+      if (chain && chain.length >= 2) {
+        // Only flag std::<fn> (or alias to std); ignore student namespaces like math_util::pow()
+        if (chain.length === 2 && chain[0] === 'std') {
+          return tokens[i].line;
+        }
+        continue;
+      }
+
+      const isGlobalScope = prev === '::';
+      if (ctx.userDefinedNames.has(banned) && !isGlobalScope) continue;
+      if (tokens[i + 1]?.value === '(' || isGlobalScope) {
         return tokens[i].line;
       }
     }
